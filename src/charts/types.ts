@@ -1,6 +1,133 @@
 // packages/cereon-recharts/src/cards/charts/types.ts
-import React from "react";
-import { FormFieldOrGroup } from "../ui";
+import React, { ReactNode } from "react";
+
+export type Operator =
+  | "strict_equals"
+  | "not_strict_equals"
+  | "equals"
+  | "not_equals"
+  | "greater_than"
+  | "greater_than_or_equals"
+  | "less_than"
+  | "less_than_or_equals"
+  | "includes"
+  | "not_includes";
+
+export type Condition = {
+  field: string;
+  operator: Operator;
+  value: any;
+  relation?: "or" | "and";
+};
+
+export interface Option {
+  icon?: string | ReactNode;
+  label: string;
+  value: string | number;
+  [key: string]: any;
+}
+
+export type FieldVariants =
+  | "text"
+  | "email"
+  | "password"
+  | "number"
+  | "select"
+  | "checkbox"
+  | "logo"
+  | "textarea"
+  | "file"
+  | "multi-select"
+  | "tags-input"
+  | "envs"
+  | "slider"
+  | "toggle"
+  | "carousel"
+  | "record"
+  | "slider"
+  | "separator"
+  | "custom"
+  | React.HTMLInputTypeAttribute;
+
+export interface CustomFieldProps<T = any> {
+  value: T;
+  onChange: (value: T) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  required?: boolean;
+  className?: string;
+  [key: string]: any;
+}
+
+export interface ChartFormFieldSchema {
+  name: string;
+  label: string;
+  icon?: string | ReactNode;
+  pattern?: RegExp;
+  patternErrorMessage?: string;
+  disableLabelDescription?: boolean;
+  renderSelectItem?: (
+    item: Option,
+    options: Option[],
+    selectedOption: Option
+  ) => ReactNode;
+  renderSliderFooter?: (
+    value: number,
+    min: number,
+    max: number,
+    step: number
+  ) => ReactNode;
+  renderSliderHeader?: (
+    value: number,
+    min: number,
+    max: number,
+    step: number
+  ) => ReactNode;
+  type?: React.HTMLInputTypeAttribute;
+  variant?: FieldVariants;
+  accept?: string;
+  placeholder?: string | { key?: string; value?: string };
+  recordValueType?: "string" | "number";
+  disableKey?: boolean;
+  disableAddDelete?: boolean;
+  description?: string;
+  disabled?: boolean;
+  options?: Option[];
+  logoVariant?: "default" | "rectangle";
+  step?: number;
+  required?: boolean;
+  requiredErrorMessage?: string;
+  min?: number;
+  max?: number;
+  conditionalLogic?: Condition[];
+  maxFiles?: number;
+  className?: string;
+  needUserInput?: boolean;
+  is_secret?: boolean;
+  autocomplete?: React.HTMLInputAutoCompleteAttribute;
+  fetchOptions?: (
+    limit: number,
+    offset: number,
+    inputValue?: string
+  ) => Promise<Option[]>;
+  evaluatePasswordCriteria?: (password: string) => string[];
+  generatePassword?: () => string;
+  defaultValue?:
+    | string
+    | number
+    | boolean
+    | Date
+    | string[]
+    | number[]
+    | boolean[]
+    | Date[];
+  customComponent?: React.ComponentType<CustomFieldProps>;
+  customProps?: Record<string, any>;
+  setFirstItemAsOption?: boolean;
+  inline?: boolean;
+}
+
+export type ChartFormFieldOrGroup = ChartFormFieldSchema | ChartFormFieldSchema[];
 
 export interface CardGridPosition {
   /** X position in grid units */
@@ -29,7 +156,7 @@ export interface CardGridPosition {
 
 export interface CardFiltersProps {
   /** Filter configuration schema */
-  schema: FormFieldOrGroup[];
+  schema: ChartFormFieldOrGroup[];
   /** Default values for the filters */
   defaultValues?: Record<string, any>;
   /** Whether the filters are disabled */
