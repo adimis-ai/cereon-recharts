@@ -22,6 +22,7 @@ import type {
   ChartCardProps,
   PieChartCardSettings,
   BaseChartProps,
+  ChartDataPoint,
 } from "./types";
 import {
   normalizeChartData,
@@ -64,7 +65,7 @@ export function PieChart({
     [config]
   );
 
-  const chartData = useMemo(() => {
+  const [chartData, setChartData] = React.useState<ChartDataPoint[]>(() => {
     const normalized = normalizeChartData(rawData);
 
     return normalized
@@ -107,6 +108,65 @@ export function PieChart({
         (item) =>
           typeof item.value === "number" && !isNaN(item.value) && item.value > 0
       );
+  });
+
+  const _rawDataSerialized = React.useRef<string | null>(null);
+  const safeSerialize = (v: any) => {
+    try {
+      return JSON.stringify(v);
+    } catch (e) {
+      return String(v);
+    }
+  };
+
+  React.useEffect(() => {
+    const normalized = normalizeChartData(rawData);
+    const computed = normalized
+      .map((item, index) => {
+        const name =
+          config.nameKey && (item as any)[config.nameKey] != null
+            ? (item as any)[config.nameKey]
+            : config.dataKey &&
+              (item as any)[config.dataKey] != null &&
+              typeof (item as any)[config.dataKey] !== "number"
+            ? (item as any)[config.dataKey]
+            : (item as any).name ?? `Item ${index + 1}`;
+
+        const seriesKey =
+          (config as any).series &&
+          Array.isArray((config as any).series) &&
+          (config as any).series[0]
+            ? (config as any).series[0].key
+            : undefined;
+        const rawValue =
+          config.valueKey && (item as any)[config.valueKey] != null
+            ? (item as any)[config.valueKey]
+            : seriesKey && (item as any)[seriesKey] != null
+            ? (item as any)[seriesKey]
+            : (config.dataKey &&
+              typeof (item as any)[config.dataKey] === "number"
+                ? (item as any)[config.dataKey]
+                : undefined) ?? (item as any).value;
+
+        const value = Number(rawValue ?? 0);
+
+        return {
+          name,
+          value,
+          _raw: item,
+          ...item,
+        } as any;
+      })
+      .filter(
+        (item) =>
+          typeof item.value === "number" && !isNaN(item.value) && item.value > 0
+      );
+
+    const serialized = safeSerialize(rawData);
+    if (serialized !== _rawDataSerialized.current) {
+      _rawDataSerialized.current = serialized;
+      setChartData(computed);
+    }
   }, [rawData, config]);
 
   // Generate colors
@@ -353,6 +413,18 @@ export function PieChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
+  React.useEffect(() => {
+    try {
+      console.log(
+        `[DEBUG:CHART-CARD] pie reportId=${reportId} cardId=${
+          (card && (card as any).id) || "<unknown>"
+        } data=`,
+        data
+      );
+    } catch (e) {
+      console.log(`[DEBUG:CHART-CARD] pie unable to serialize data`, e);
+    }
+  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>

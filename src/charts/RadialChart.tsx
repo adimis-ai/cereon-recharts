@@ -20,6 +20,7 @@ import type {
   ChartCardProps,
   RadialChartCardSettings,
   BaseChartProps,
+  ChartDataPoint,
 } from "./types";
 import {
   normalizeChartData,
@@ -62,8 +63,8 @@ export function RadialChart({
     [config]
   );
 
-  // Process and normalize data
-  const chartData = useMemo(() => {
+  // Process and normalize data (reactive to realtime changes)
+  const [chartData, setChartData] = React.useState<ChartDataPoint[]>(() => {
     const normalized = normalizeChartData(rawData);
 
     // Transform data for radial chart format
@@ -86,6 +87,43 @@ export function RadialChart({
 
       return transformedItem;
     });
+  });
+
+  const _rawDataSerialized = React.useRef<string | null>(null);
+  const safeSerialize = (v: any) => {
+    try {
+      return JSON.stringify(v);
+    } catch (e) {
+      return String(v);
+    }
+  };
+
+  React.useEffect(() => {
+    const normalized = normalizeChartData(rawData);
+
+    const computed = normalized.map((item, index) => {
+      const transformedItem: any = { ...item };
+
+      config.series.forEach((s, seriesIndex) => {
+        const value = Number(item[s.dataKey] || 0);
+        transformedItem[s.dataKey] = value;
+
+        if (config.variant === "area") {
+          transformedItem[`${s.dataKey}_fill`] = `${Math.min(
+            100,
+            (value / 100) * 100
+          )}%`;
+        }
+      });
+
+      return transformedItem;
+    });
+
+    const serialized = safeSerialize(rawData);
+    if (serialized !== _rawDataSerialized.current) {
+      _rawDataSerialized.current = serialized;
+      setChartData(computed);
+    }
   }, [rawData, config.series, config.variant]);
 
   // Generate series configuration if not provided
@@ -377,6 +415,19 @@ export function RadialChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
+
+  React.useEffect(() => {
+    try {
+      console.log(
+        `[DEBUG:CHART-CARD] radial reportId=${reportId} cardId=${
+          (card && (card as any).id) || "<unknown>"
+        } data=`,
+        data
+      );
+    } catch (e) {
+      console.log(`[DEBUG:CHART-CARD] radial unable to serialize data`, e);
+    }
+  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>

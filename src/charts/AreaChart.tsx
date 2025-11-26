@@ -1,7 +1,7 @@
 // src/charts/AreaChart.tsx
 "use client";
 
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   Area,
   AreaChart as RechartsAreaChart,
@@ -93,8 +93,27 @@ export function AreaChart({
     [config]
   );
 
-  // Process and normalize data
-  const chartData = useMemo(() => normalizeChartData(rawData), [rawData]);
+  // Process and normalize data (reactive to realtime changes)
+  const [chartData, setChartData] = React.useState(() =>
+    normalizeChartData(rawData)
+  );
+
+  const _rawDataSerialized = React.useRef<string | null>(null);
+  const safeSerialize = (v: any) => {
+    try {
+      return JSON.stringify(v);
+    } catch (e) {
+      return String(v);
+    }
+  };
+
+  React.useEffect(() => {
+    const serialized = safeSerialize(rawData);
+    if (serialized !== _rawDataSerialized.current) {
+      _rawDataSerialized.current = serialized;
+      setChartData(normalizeChartData(rawData));
+    }
+  }, [rawData]);
 
   // Generate series configuration if not provided
   const series = useMemo(() => {
@@ -136,19 +155,6 @@ export function AreaChart({
 
     return configObj;
   }, [series]);
-
-  // Handle responsive dimensions
-  const dimensions = useMemo(() => {
-    if (typeof width === "number" && typeof height === "number") {
-      return calculateResponsiveDimensions(
-        { width, height },
-        config.aspectRatio,
-        300,
-        200
-      );
-    }
-    return { width: "100%", height };
-  }, [width, height, config.aspectRatio]);
 
   // Calculate margins
   const margin = useMemo(() => {
@@ -447,6 +453,17 @@ export function AreaChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
+
+  React.useEffect(() => {
+    try {
+      console.log(
+        `[DEBUG:CHART-CARD] area reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
+        data
+      );
+    } catch (e) {
+      console.log(`[DEBUG:CHART-CARD] area unable to serialize data`, e);
+    }
+  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>

@@ -1,7 +1,7 @@
 // src/charts/LineChart.tsx
 "use client";
 
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   Line,
   LineChart as RechartsLineChart,
@@ -66,9 +66,26 @@ export function LineChart({
     [config]
   );
 
-  // Process and normalize data
-  const chartData = useMemo(() => {
-    return normalizeChartData(rawData);
+  // Process and normalize data (reactive to realtime changes)
+  const [chartData, setChartData] = React.useState(() =>
+    normalizeChartData(rawData)
+  );
+
+  const _rawDataSerialized = React.useRef<string | null>(null);
+  const safeSerialize = (v: any) => {
+    try {
+      return JSON.stringify(v);
+    } catch (e) {
+      return String(v);
+    }
+  };
+
+  React.useEffect(() => {
+    const serialized = safeSerialize(rawData);
+    if (serialized !== _rawDataSerialized.current) {
+      _rawDataSerialized.current = serialized;
+      setChartData(normalizeChartData(rawData));
+    }
   }, [rawData]);
 
   // Generate series configuration if not provided
@@ -403,6 +420,17 @@ export function LineChartCard({
     return records as any[];
   }, [records]);
 
+  React.useEffect(() => {
+    try {
+      console.log(
+        `[DEBUG:CHART-CARD] line reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
+        data
+      );
+    } catch (e) {
+      console.log(`[DEBUG:CHART-CARD] line unable to serialize data`, e);
+    }
+  }, [reportId, card, data]);
+
   return (
     <div className={`w-full h-full ${className || ""}`}>
       <LineChart
@@ -418,3 +446,4 @@ export function LineChartCard({
     </div>
   );
 }
+

@@ -70,8 +70,27 @@ export function BarChart({
     [config]
   );
 
-  // Process and normalize data
-  const chartData = useMemo(() => normalizeChartData(rawData), [rawData]);
+  // Process and normalize data (reactive to realtime changes)
+  const [chartData, setChartData] = React.useState(() =>
+    normalizeChartData(rawData)
+  );
+
+  const _rawDataSerialized = React.useRef<string | null>(null);
+  const safeSerialize = (v: any) => {
+    try {
+      return JSON.stringify(v);
+    } catch (e) {
+      return String(v);
+    }
+  };
+
+  React.useEffect(() => {
+    const serialized = safeSerialize(rawData);
+    if (serialized !== _rawDataSerialized.current) {
+      _rawDataSerialized.current = serialized;
+      setChartData(normalizeChartData(rawData));
+    }
+  }, [rawData]);
 
   // Generate series configuration if not provided
   const series = useMemo(() => {
@@ -412,6 +431,17 @@ export function BarChartCard({
     return records as any[];
   }, [records]);
 
+  React.useEffect(() => {
+    try {
+      console.log(
+        `[DEBUG:CHART-CARD] bar reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
+        data
+      );
+    } catch (e) {
+      console.log(`[DEBUG:CHART-CARD] bar unable to serialize data`, e);
+    }
+  }, [reportId, card, data]);
+
   return (
     <div className={`w-full h-full ${className || ""}`}>
       <BarChart
@@ -427,6 +457,11 @@ export function BarChartCard({
     </div>
   );
 }
+
+// Add logging for BarChartCard data
+(function attachBarCardLogging(){
+  // no-op to keep tooling happy; actual logging is inside component via hook
+})();
 
 // Export both components
 export default BarChart;
