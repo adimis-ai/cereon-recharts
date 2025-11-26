@@ -568,6 +568,10 @@ export type AnyChartConfig =
 
 export interface BaseChartCardSettings extends CommonCardSettings {
   chartConfig: AnyChartConfig;
+  /** Optional explicit width for chart rendering (number px or string like '100%') */
+  width?: number | string;
+  /** Optional explicit height for chart rendering (number px or string like '50%') */
+  height?: number | string;
   dataMapping?: {
     xField?: string;
     yField?: string;

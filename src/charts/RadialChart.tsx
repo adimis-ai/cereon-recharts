@@ -40,7 +40,7 @@ export function RadialChart({
   data: rawData,
   config: userConfig,
   width = "100%",
-  height = 400,
+  height = 500,
   className = "",
   loading = false,
   error = null,
@@ -403,8 +403,8 @@ export function RadialChartCard({
       <RadialChart
         data={data}
         config={card.settings.chartConfig}
-        width="100%"
-        height="100%"
+        width={card.settings.width ?? "100%"}
+        height={card.settings.height ?? 500}
         loading={state?.loadingState === "loading"}
         error={state?.error || null}
         theme={theme}
