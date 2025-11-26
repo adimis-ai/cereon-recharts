@@ -46,7 +46,6 @@ export function RadialChart({
   error = null,
   onDataPointClick,
   onDataPointHover,
-  onLegendClick,
   theme,
 }: RadialChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
