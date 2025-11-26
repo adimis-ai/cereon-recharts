@@ -16,10 +16,6 @@ import {
   resolveTheme,
 } from "./theme";
 
-// ========================================
-// Color Management
-// ========================================
-
 export const DEFAULT_CHART_COLORS: string[] = [
   "var(--chart-1)",
   "var(--chart-2)",
@@ -92,7 +88,6 @@ export function generateColorPalette(
   return colors.slice(0, count);
 }
 
-// Enhanced palette generator that can optionally return gradient stop pairs.
 export function generateColorPaletteWithGradients(
   scheme: ChartColorScheme = {},
   count: number = 12,
@@ -231,10 +226,6 @@ function hexToHsl(hex: string): { h: number; s: number; l: number } {
     l: Math.round(l * 100),
   };
 }
-
-// ========================================
-// Data Transformation
-// ========================================
 
 /**
  * Normalize data for chart consumption
@@ -418,10 +409,6 @@ export function formatDataForChart(
       return arr;
   }
 }
-
-// ========================================
-// Configuration Helpers
-// ========================================
 
 /**
  * Default configurations for different chart types
@@ -721,10 +708,6 @@ export function validateChartConfig(config: AnyChartConfig): {
   };
 }
 
-// ========================================
-// Responsive Helpers
-// ========================================
-
 /**
  * Calculate responsive dimensions
  */
@@ -771,10 +754,6 @@ export function getResponsiveMargin(
     left: (baseMargin.left || 20) * scale,
   };
 }
-
-// ========================================
-// Export Utilities
-// ========================================
 
 /**
  * Convert chart to data URL for export
