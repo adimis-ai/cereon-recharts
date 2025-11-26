@@ -172,12 +172,12 @@ export function RadialChart({
     const outerRadius =
       typeof config.outerRadius === "string"
         ? parseInt(config.outerRadius.replace("%", ""))
-        : config.outerRadius || 80;
+        : config.outerRadius || 95;
 
     const innerRadius =
       typeof config.innerRadius === "string"
         ? parseInt(config.innerRadius.replace("%", ""))
-        : config.innerRadius || 20;
+        : config.innerRadius || 8;
 
     return { outerRadius, innerRadius };
   }, [config.outerRadius, config.innerRadius]);
@@ -268,7 +268,18 @@ export function RadialChart({
           data={chartData}
           cx="50%"
           cy={"50%"}
-          barSize={config?.barSize || 14}
+          barSize={
+            typeof config?.barSize === "number"
+              ? config.barSize
+              : Math.max(
+                  12,
+                  Math.floor(
+                    (radialDimensions.outerRadius -
+                      radialDimensions.innerRadius) /
+                      Math.max(series.length, 1)
+                  )
+                )
+          }
           barGap={config?.barGap || 4}
           innerRadius={`${radialDimensions.innerRadius}%`}
           outerRadius={`${radialDimensions.outerRadius}%`}
@@ -345,6 +356,12 @@ export function RadialChart({
           {/* Legend */}
           {config.legend?.enabled !== false && (
             <ChartLegend
+              payload={series.map((s) => ({
+                dataKey: s.dataKey,
+                value: s.name || s.dataKey,
+                color: `var(--color-${s.dataKey})`,
+                payload: { dataKey: s.dataKey, strokeDasharray: "" },
+              }))}
               content={
                 <ChartLegendContent
                   hideIcon={config.legend?.hideIcon}
