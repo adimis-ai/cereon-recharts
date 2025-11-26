@@ -75,6 +75,19 @@ export function BarChart({
     normalizeChartData(rawData)
   );
 
+  const coerceNumericStrings = (arr: any[]) =>
+    arr.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const out: Record<string, any> = { ...item };
+      Object.keys(out).forEach((k) => {
+        const v = out[k];
+        if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v))) {
+          out[k] = Number(v);
+        }
+      });
+      return out;
+    });
+
   const _rawDataSerialized = React.useRef<string | null>(null);
   const safeSerialize = (v: any) => {
     try {
@@ -88,7 +101,13 @@ export function BarChart({
     const serialized = safeSerialize(rawData);
     if (serialized !== _rawDataSerialized.current) {
       _rawDataSerialized.current = serialized;
-      setChartData(normalizeChartData(rawData));
+      try {
+        const normalized = normalizeChartData(rawData);
+        const coerced = coerceNumericStrings(normalized as any[]);
+        setChartData(coerced as any[]);
+      } catch (e) {
+        setChartData(normalizeChartData(rawData));
+      }
     }
   }, [rawData]);
 
@@ -265,10 +284,18 @@ export function BarChart({
             <XAxis
               type={config.orientation === "horizontal" ? "number" : "category"}
               dataKey={
-                config.orientation === "horizontal"
-                  ? undefined
-                  : config.xAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0]
+                (() => {
+                  if (config.orientation === "horizontal") return undefined;
+                  const candidate =
+                    config.xAxis?.label?.value ||
+                    Object.keys(chartData[0] || {})[0];
+                  const missingCount = chartData.filter((d: any) => {
+                    if (!candidate || typeof candidate !== "string") return true;
+                    return d && typeof d[candidate] === "undefined";
+                  }).length;
+                  if (missingCount > chartData.length / 2) return "index";
+                  return candidate;
+                })()
               }
               axisLine={config.xAxis?.line?.enabled !== false}
               tickLine={config.xAxis?.tick !== undefined}
@@ -387,11 +414,20 @@ export function BarChart({
           {config.responsive && (
             <Brush
               dataKey={
-                config.orientation === "horizontal"
-                  ? config.yAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0]
-                  : config.xAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0]
+                (() => {
+                  const candidate =
+                    config.orientation === "horizontal"
+                      ? config.yAxis?.label?.value ||
+                        Object.keys(chartData[0] || {})[0]
+                      : config.xAxis?.label?.value ||
+                        Object.keys(chartData[0] || {})[0];
+                  const missingCount = chartData.filter((d: any) => {
+                    if (!candidate || typeof candidate !== "string") return true;
+                    return d && typeof d[candidate] === "undefined";
+                  }).length;
+                  if (missingCount > chartData.length / 2) return "index";
+                  return candidate;
+                })()
               }
               height={30}
               stroke="var(--muted-foreground)"

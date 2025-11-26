@@ -71,6 +71,19 @@ export function LineChart({
     normalizeChartData(rawData)
   );
 
+  const coerceNumericStrings = (arr: any[]) =>
+    arr.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const out: Record<string, any> = { ...item };
+      Object.keys(out).forEach((k) => {
+        const v = out[k];
+        if (typeof v === "string" && v.trim() !== "" && !isNaN(Number(v))) {
+          out[k] = Number(v);
+        }
+      });
+      return out;
+    });
+
   const _rawDataSerialized = React.useRef<string | null>(null);
   const safeSerialize = (v: any) => {
     try {
@@ -84,7 +97,13 @@ export function LineChart({
     const serialized = safeSerialize(rawData);
     if (serialized !== _rawDataSerialized.current) {
       _rawDataSerialized.current = serialized;
-      setChartData(normalizeChartData(rawData));
+      try {
+        const normalized = normalizeChartData(rawData);
+        const coerced = coerceNumericStrings(normalized as any[]);
+        setChartData(coerced as any[]);
+      } catch (e) {
+        setChartData(normalizeChartData(rawData));
+      }
     }
   }, [rawData]);
 
@@ -247,9 +266,18 @@ export function LineChart({
           {config.xAxis?.enabled !== false && (
             <XAxis
               dataKey={
-                (config.xAxis as any)?.dataKey ||
-                config.xAxis?.label?.value ||
-                Object.keys(chartData[0] || {})[0]
+                (() => {
+                  const candidate =
+                    (config.xAxis as any)?.dataKey ||
+                    config.xAxis?.label?.value ||
+                    Object.keys(chartData[0] || {})[0];
+
+                  const missingCount = chartData.filter(
+                    (d: any) => d && typeof d[candidate] === "undefined"
+                  ).length;
+                  if (missingCount > chartData.length / 2) return "index";
+                  return candidate;
+                })()
               }
               axisLine={config.xAxis?.line?.enabled !== false}
               tickLine={config.xAxis?.tick !== undefined}
