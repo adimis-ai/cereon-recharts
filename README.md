@@ -65,22 +65,20 @@ A minimal, recommended registration pattern looks like this:
 
 ```ts
 // register-charts.ts
-import { registerCard } from "@cereon/dashboard";
-import * as charts from "@cereon/recharts";
+function CardRegistrar() {
+  const { registerCard } = useDashboard();
 
-// `charts` should export card components or registration objects
-// Example: charts.LineCard, charts.AreaCard, etc.
+  useEffect(() => {
+    registerCard("recharts:line", charts.LineChartCard);
+    registerCard("recharts:area", charts.AreaChartCard);
+    registerCard("recharts:bar", charts.BarChartCard);
+    registerCard("recharts:pie", charts.PieChartCard);
+    registerCard("recharts:radar", charts.RadarChartCard);
+    registerCard("recharts:radial", charts.RadialChartCard);
+  }, []);
 
-registerCard("recharts:line", charts.LineCard);
-registerCard("recharts:area", charts.AreaCard);
-registerCard("recharts:bar", charts.BarCard);
-registerCard("recharts:pie", charts.PieCard);
-registerCard("recharts:radar", charts.RadarCard);
-registerCard("recharts:radial", charts.RadialCard);
-
-// If the package exports a default `cards` map you can also bulk-register:
-// import cards from '@cereon/recharts/cards'
-// Object.entries(cards).forEach(([id, Card]) => registerCard(id, Card))
+  return null;
+}
 ```
 
 How to use the registered card in a dashboard configuration:

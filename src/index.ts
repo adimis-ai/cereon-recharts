@@ -13,3 +13,10 @@ export type {
   AnyChartCardSettings,
   ChartType,
 } from "./charts";
+
+export { AreaChartCard } from "./charts/AreaChart";
+export { BarChartCard } from "./charts/BarChart";
+export { LineChartCard } from "./charts/LineChart";
+export { PieChartCard } from "./charts/PieChart";
+export { RadarChartCard } from "./charts/RadarChart";
+export { RadialChartCard } from "./charts/RadialChart";
