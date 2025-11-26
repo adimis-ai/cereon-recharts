@@ -1,4 +1,4 @@
-// packages/cereon-recharts/src/cards/charts/types.ts
+// src/charts/types.ts
 import React, { ReactNode } from "react";
 
 export type Operator =

@@ -1,7 +1,7 @@
-// RadarChart Component - Reusable radar chart with customizable grids, multiple data series, and fill options
+// src/charts/RadarChart.tsx
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   Radar,
   RadarChart as RechartsRadarChart,
@@ -32,10 +32,6 @@ import {
   calculateResponsiveDimensions,
   getResponsiveMargin,
 } from "./utils";
-
-// ========================================
-// Radar Chart Component
-// ========================================
 
 export interface RadarChartProps extends BaseChartProps {
   config: RadarChartConfig;
@@ -342,10 +338,6 @@ export function RadarChart({
   );
 }
 
-// ========================================
-// Radar Chart Card Component
-// ========================================
-
 export function RadarChartCard({
   reportId,
   card,
@@ -384,6 +376,3 @@ export function RadarChartCard({
     </div>
   );
 }
-
-// Export both components
-export default RadarChart;

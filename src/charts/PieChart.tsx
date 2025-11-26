@@ -1,4 +1,4 @@
-// PieChart Component - Reusable pie/donut chart with custom labels, legends, and interactive features
+// src/charts/PieChart.tsx
 "use client";
 
 import React, { useMemo, useRef } from "react";
@@ -32,99 +32,9 @@ import {
   getResponsiveMargin,
 } from "./utils";
 
-// ========================================
-// Pie Chart Component
-// ========================================
-
 export interface PieChartProps extends BaseChartProps {
   config: PieChartConfig;
 }
-
-// Custom active shape for pie segments
-const renderActiveShape = (props: any) => {
-  const RADIAN = Math.PI / 180;
-  const {
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-  } = props;
-
-  const sin = Math.sin(-RADIAN * midAngle);
-  const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (outerRadius + 10) * cos;
-  const sy = cy + (outerRadius + 10) * sin;
-  const mx = cx + (outerRadius + 30) * cos;
-  const my = cy + (outerRadius + 30) * sin;
-  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-  const ey = my;
-  const textAnchor = cos >= 0 ? "start" : "end";
-
-  return (
-    <g>
-      <text
-        x={cx}
-        y={cy}
-        dy={8}
-        textAnchor="middle"
-        fill={fill}
-        className="text-sm font-medium"
-      >
-        {payload.name}
-      </text>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        innerRadius={outerRadius + 6}
-        outerRadius={outerRadius + 10}
-        fill={fill}
-      />
-      <path
-        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={fill}
-        fill="none"
-      />
-      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12}
-        y={ey}
-        textAnchor={textAnchor}
-        fill="var(--foreground)"
-        className="text-sm"
-      >
-        {`${value}`}
-      </text>
-      <text
-        x={ex + (cos >= 0 ? 1 : -1) * 12}
-        y={ey}
-        dy={18}
-        textAnchor={textAnchor}
-        fill="var(--muted-foreground)"
-        className="text-xs"
-      >
-        {`(${(percent * 100).toFixed(2)}%)`}
-      </text>
-    </g>
-  );
-};
 
 export function PieChart({
   data: rawData,
@@ -421,10 +331,6 @@ export function PieChart({
   );
 }
 
-// ========================================
-// Pie Chart Card Component
-// ========================================
-
 export function PieChartCard({
   reportId,
   card,
@@ -463,6 +369,3 @@ export function PieChartCard({
     </div>
   );
 }
-
-// Export both components
-export default PieChart;

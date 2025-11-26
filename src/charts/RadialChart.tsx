@@ -1,4 +1,4 @@
-// RadialChart Component - Reusable radial bar chart and progress indicators
+// src/charts/RadialChart.tsx
 "use client";
 
 import React, { useMemo, useRef } from "react";
@@ -30,10 +30,6 @@ import {
   calculateResponsiveDimensions,
   getResponsiveMargin,
 } from "./utils";
-
-// ========================================
-// Radial Chart Component
-// ========================================
 
 export interface RadialChartProps extends BaseChartProps {
   config: RadialChartConfig;
@@ -359,10 +355,6 @@ export function RadialChart({
   );
 }
 
-// ========================================
-// Radial Chart Card Component
-// ========================================
-
 export function RadialChartCard({
   reportId,
   card,
@@ -401,6 +393,3 @@ export function RadialChartCard({
     </div>
   );
 }
-
-// Export both components
-export default RadialChart;

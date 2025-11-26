@@ -1,4 +1,4 @@
-// Chart Utilities - Helper functions for data transformation, colors, and chart configuration
+// src/charts/utils.ts
 import type {
   ChartData,
   ChartDataPoint,

@@ -1,4 +1,4 @@
-// AreaChart Component - Reusable area chart with gradients, stacking, and multiple series
+// src/charts/AreaChart.tsx
 "use client";
 
 import { useMemo, useRef } from "react";
@@ -11,8 +11,29 @@ import {
   Brush,
 } from "recharts";
 import type { CurveType } from "recharts/types/shape/Curve";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "../ui";
+import type {
+  AreaChartConfig,
+  ChartCardProps,
+  AreaChartCardSettings,
+  BaseChartProps,
+} from "./types";
+import {
+  normalizeChartData,
+  generateColorPalette,
+  generateSeriesConfig,
+  mergeChartConfig,
+  validateChartConfig,
+  calculateResponsiveDimensions,
+  getResponsiveMargin,
+} from "./utils";
 
-// Map common curve names from config/series to the exact Recharts CurveType union.
 function mapCurveToRecharts(curve: string | undefined): CurveType {
   const c = (curve || "natural").toString();
   const allowed: Record<string, CurveType> = {
@@ -40,32 +61,6 @@ function mapCurveToRecharts(curve: string | undefined): CurveType {
 
   return (allowed[c] as CurveType) || "natural";
 }
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
-} from "../ui";
-import type {
-  AreaChartConfig,
-  ChartCardProps,
-  AreaChartCardSettings,
-  BaseChartProps,
-} from "./types";
-import {
-  normalizeChartData,
-  generateColorPalette,
-  generateSeriesConfig,
-  mergeChartConfig,
-  validateChartConfig,
-  calculateResponsiveDimensions,
-  getResponsiveMargin,
-} from "./utils";
-
-// ========================================
-// Area Chart Component
-// ========================================
 
 export interface AreaChartProps extends BaseChartProps {
   config: AreaChartConfig;
@@ -430,10 +425,6 @@ export function AreaChart({
   );
 }
 
-// ========================================
-// Area Chart Card Component
-// ========================================
-
 export function AreaChartCard({
   reportId,
   card,
@@ -472,6 +463,3 @@ export function AreaChartCard({
     </div>
   );
 }
-
-// Export both components
-export default AreaChart;

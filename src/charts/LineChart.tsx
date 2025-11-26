@@ -1,7 +1,7 @@
-// LineChart Component - Reusable line chart with multiple lines, dots, curves, and step options
+// src/charts/LineChart.tsx
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   Line,
   LineChart as RechartsLineChart,
@@ -34,10 +34,6 @@ import {
   calculateResponsiveDimensions,
   getResponsiveMargin,
 } from "./utils";
-
-// ========================================
-// Line Chart Component
-// ========================================
 
 export interface LineChartProps extends BaseChartProps {
   config: LineChartConfig;
@@ -384,10 +380,6 @@ export function LineChart({
   );
 }
 
-// ========================================
-// Line Chart Card Component
-// ========================================
-
 export function LineChartCard({
   reportId,
   card,
@@ -426,6 +418,3 @@ export function LineChartCard({
     </div>
   );
 }
-
-// Export both components
-export default LineChart;
