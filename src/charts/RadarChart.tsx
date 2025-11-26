@@ -126,19 +126,6 @@ export function RadarChart({
     return configObj;
   }, [series]);
 
-  // Handle responsive dimensions
-  const dimensions = useMemo(() => {
-    if (typeof width === "number" && typeof height === "number") {
-      return calculateResponsiveDimensions(
-        { width, height },
-        config.aspectRatio,
-        300,
-        300
-      );
-    }
-    return { width: "100%", height };
-  }, [width, height, config.aspectRatio]);
-
   // Calculate margins
   const margin = useMemo(() => {
     const containerWidth = typeof width === "number" ? width : 400;

@@ -343,10 +343,18 @@ export function RadialChart({
           })}
 
           {/* Legend */}
-          {config.legend?.enabled !== false &&
-            {
-              /*TODO: Render chart legend*/
-            }}
+          {config.legend?.enabled !== false && (
+            <ChartLegend
+              content={
+                <ChartLegendContent
+                  hideIcon={config.legend?.hideIcon}
+                  className={
+                    config.legend?.position === "top" ? "pb-3" : "pt-3"
+                  }
+                />
+              }
+            />
+          )}
         </RechartsRadialBarChart>
       </ChartContainer>
     </div>
