@@ -260,7 +260,7 @@ export function RadialChart({
 
   return (
     <div ref={chartRef} className={className} style={{ width, height }}>
-      <ChartContainer config={chartConfig}>
+      <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
         <RechartsRadialBarChart
           data={chartData}
           cx="50%"
