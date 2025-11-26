@@ -260,11 +260,16 @@ export function RadialChart({
 
   return (
     <div ref={chartRef} className={className} style={{ width, height }}>
-      <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+      <ChartContainer
+        config={chartConfig}
+        className="h-full w-full aspect-auto"
+      >
         <RechartsRadialBarChart
           data={chartData}
           cx="50%"
-          cy="50%"
+          cy={"50%"}
+          barSize={config?.barSize || 14}
+          barGap={config?.barGap || 4}
           innerRadius={`${radialDimensions.innerRadius}%`}
           outerRadius={`${radialDimensions.outerRadius}%`}
           startAngle={config.startAngle || 0}
@@ -322,12 +327,6 @@ export function RadialChart({
 
           {/* Radial Bars */}
           {series.map((s, index) => {
-            const barRadius =
-              radialDimensions.innerRadius +
-              index *
-                ((radialDimensions.outerRadius - radialDimensions.innerRadius) /
-                  series.length);
-
             return (
               <RadialBar
                 key={s.dataKey}
@@ -338,55 +337,16 @@ export function RadialChart({
                 strokeWidth={s.strokeWidth || 0}
                 cornerRadius={config.cornerRadius || 0}
                 angleAxisId={0}
-                label={
-                  s.label?.enabled !== false
-                    ? // Render a minimal, type-safe SVG label to avoid passing arbitrary CSS props
-                      // Recharts accepts a render function for labels which gives us full control.
-                      (((props: any) => {
-                        const value =
-                          props?.value ?? props?.payload?.value ?? "";
-                        const formatted =
-                          typeof s.label?.formatter === "function"
-                            ? s.label.formatter(value)
-                            : String(value);
-
-                        // Center the label within the radial bar segment using SVG text anchors
-                        const x = props?.cx ?? props?.x ?? 0;
-                        const y = props?.cy ?? props?.y ?? 0;
-
-                        return React.createElement(
-                          "text",
-                          {
-                            x,
-                            y,
-                            textAnchor: "middle",
-                            dominantBaseline: "middle",
-                            className: "text-xs font-medium",
-                            fill: s.label?.style?.color || "var(--foreground)",
-                          },
-                          formatted
-                        );
-                      }) as any)
-                    : false
-                }
                 background={{ fill: "var(--muted)" }}
               />
             );
           })}
 
           {/* Legend */}
-          {config.legend?.enabled !== false && (
-            <ChartLegend
-              content={
-                <ChartLegendContent
-                  hideIcon={config.legend?.hideIcon}
-                  className={
-                    config.legend?.position === "top" ? "pb-3" : "pt-3"
-                  }
-                />
-              }
-            />
-          )}
+          {config.legend?.enabled !== false &&
+            {
+              /*TODO: Render chart legend*/
+            }}
         </RechartsRadialBarChart>
       </ChartContainer>
     </div>
@@ -394,15 +354,12 @@ export function RadialChart({
 }
 
 export function RadialChartCard({
-  reportId,
   card,
   records,
   state,
-  params,
   className,
   theme,
 }: ChartCardProps<RadialChartCardSettings>) {
-  // Extract data from records
   const data = useMemo(() => {
     if (!records?.length) return [];
 
@@ -415,19 +372,6 @@ export function RadialChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
-
-  React.useEffect(() => {
-    try {
-      console.log(
-        `[DEBUG:CHART-CARD] radial reportId=${reportId} cardId=${
-          (card && (card as any).id) || "<unknown>"
-        } data=`,
-        data
-      );
-    } catch (e) {
-      console.log(`[DEBUG:CHART-CARD] radial unable to serialize data`, e);
-    }
-  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>

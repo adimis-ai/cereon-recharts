@@ -358,15 +358,12 @@ export function RadarChart({
 }
 
 export function RadarChartCard({
-  reportId,
   card,
   records,
   state,
-  params,
   className,
   theme,
 }: ChartCardProps<RadarChartCardSettings>) {
-  // Extract data from records
   const data = useMemo(() => {
     if (!records?.length) return [];
 
@@ -379,16 +376,6 @@ export function RadarChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
-  React.useEffect(() => {
-    try {
-      console.log(
-        `[DEBUG:CHART-CARD] radar reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
-        data
-      );
-    } catch (e) {
-      console.log(`[DEBUG:CHART-CARD] radar unable to serialize data`, e);
-    }
-  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>
@@ -405,4 +392,3 @@ export function RadarChartCard({
     </div>
   );
 }
- 

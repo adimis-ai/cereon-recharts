@@ -265,20 +265,18 @@ export function LineChart({
           {/* X Axis */}
           {config.xAxis?.enabled !== false && (
             <XAxis
-              dataKey={
-                (() => {
-                  const candidate =
-                    (config.xAxis as any)?.dataKey ||
-                    config.xAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0];
+              dataKey={(() => {
+                const candidate =
+                  (config.xAxis as any)?.dataKey ||
+                  config.xAxis?.label?.value ||
+                  Object.keys(chartData[0] || {})[0];
 
-                  const missingCount = chartData.filter(
-                    (d: any) => d && typeof d[candidate] === "undefined"
-                  ).length;
-                  if (missingCount > chartData.length / 2) return "index";
-                  return candidate;
-                })()
-              }
+                const missingCount = chartData.filter(
+                  (d: any) => d && typeof d[candidate] === "undefined"
+                ).length;
+                if (missingCount > chartData.length / 2) return "index";
+                return candidate;
+              })()}
               axisLine={config.xAxis?.line?.enabled !== false}
               tickLine={config.xAxis?.tick !== undefined}
               tick={{
@@ -426,15 +424,12 @@ export function LineChart({
 }
 
 export function LineChartCard({
-  reportId,
   card,
   records,
   state,
-  params,
   className,
   theme,
 }: ChartCardProps<LineChartCardSettings>) {
-  // Extract data from records
   const data = useMemo(() => {
     if (!records?.length) return [];
 
@@ -447,17 +442,6 @@ export function LineChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
-
-  React.useEffect(() => {
-    try {
-      console.log(
-        `[DEBUG:CHART-CARD] line reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
-        data
-      );
-    } catch (e) {
-      console.log(`[DEBUG:CHART-CARD] line unable to serialize data`, e);
-    }
-  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>
@@ -474,4 +458,3 @@ export function LineChartCard({
     </div>
   );
 }
-

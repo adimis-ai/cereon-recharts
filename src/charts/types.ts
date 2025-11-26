@@ -539,6 +539,8 @@ export interface RadialChartConfig {
   margin?: { top?: number; right?: number; bottom?: number; left?: number };
   aspectRatio?: number;
   responsive?: boolean;
+  barSize?: number;
+  barGap?: number;
 }
 
 export interface ChartLayerConfig {

@@ -283,20 +283,18 @@ export function BarChart({
           {config.xAxis?.enabled !== false && (
             <XAxis
               type={config.orientation === "horizontal" ? "number" : "category"}
-              dataKey={
-                (() => {
-                  if (config.orientation === "horizontal") return undefined;
-                  const candidate =
-                    config.xAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0];
-                  const missingCount = chartData.filter((d: any) => {
-                    if (!candidate || typeof candidate !== "string") return true;
-                    return d && typeof d[candidate] === "undefined";
-                  }).length;
-                  if (missingCount > chartData.length / 2) return "index";
-                  return candidate;
-                })()
-              }
+              dataKey={(() => {
+                if (config.orientation === "horizontal") return undefined;
+                const candidate =
+                  config.xAxis?.label?.value ||
+                  Object.keys(chartData[0] || {})[0];
+                const missingCount = chartData.filter((d: any) => {
+                  if (!candidate || typeof candidate !== "string") return true;
+                  return d && typeof d[candidate] === "undefined";
+                }).length;
+                if (missingCount > chartData.length / 2) return "index";
+                return candidate;
+              })()}
               axisLine={config.xAxis?.line?.enabled !== false}
               tickLine={config.xAxis?.tick !== undefined}
               tick={{
@@ -413,22 +411,20 @@ export function BarChart({
           {/* Data Zoom/Brush */}
           {config.responsive && (
             <Brush
-              dataKey={
-                (() => {
-                  const candidate =
-                    config.orientation === "horizontal"
-                      ? config.yAxis?.label?.value ||
-                        Object.keys(chartData[0] || {})[0]
-                      : config.xAxis?.label?.value ||
-                        Object.keys(chartData[0] || {})[0];
-                  const missingCount = chartData.filter((d: any) => {
-                    if (!candidate || typeof candidate !== "string") return true;
-                    return d && typeof d[candidate] === "undefined";
-                  }).length;
-                  if (missingCount > chartData.length / 2) return "index";
-                  return candidate;
-                })()
-              }
+              dataKey={(() => {
+                const candidate =
+                  config.orientation === "horizontal"
+                    ? config.yAxis?.label?.value ||
+                      Object.keys(chartData[0] || {})[0]
+                    : config.xAxis?.label?.value ||
+                      Object.keys(chartData[0] || {})[0];
+                const missingCount = chartData.filter((d: any) => {
+                  if (!candidate || typeof candidate !== "string") return true;
+                  return d && typeof d[candidate] === "undefined";
+                }).length;
+                if (missingCount > chartData.length / 2) return "index";
+                return candidate;
+              })()}
               height={30}
               stroke="var(--muted-foreground)"
               fill="var(--muted)"
@@ -445,11 +441,9 @@ export function BarChart({
 // ========================================
 
 export function BarChartCard({
-  reportId,
   card,
   records,
   state,
-  params,
   className,
   theme,
 }: ChartCardProps<BarChartCardSettings>) {
@@ -466,17 +460,6 @@ export function BarChartCard({
     // Handle single record
     return records as any[];
   }, [records]);
-
-  React.useEffect(() => {
-    try {
-      console.log(
-        `[DEBUG:CHART-CARD] bar reportId=${reportId} cardId=${(card && (card as any).id) || "<unknown>"} data=`,
-        data
-      );
-    } catch (e) {
-      console.log(`[DEBUG:CHART-CARD] bar unable to serialize data`, e);
-    }
-  }, [reportId, card, data]);
 
   return (
     <div className={`w-full h-full ${className || ""}`}>
@@ -495,7 +478,7 @@ export function BarChartCard({
 }
 
 // Add logging for BarChartCard data
-(function attachBarCardLogging(){
+(function attachBarCardLogging() {
   // no-op to keep tooling happy; actual logging is inside component via hook
 })();
 
