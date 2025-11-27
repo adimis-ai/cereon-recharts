@@ -30,7 +30,6 @@ import {
   generateSeriesConfig,
   mergeChartConfig,
   validateChartConfig,
-  calculateResponsiveDimensions,
   getResponsiveMargin,
 } from "./utils";
 
@@ -469,14 +468,14 @@ export function AreaChartCard({
   const data = useMemo(() => {
     if (!records?.length) return [];
 
-    // Handle different record formats
-    const firstRecord = records[0];
-    if (firstRecord && Array.isArray((firstRecord as any).data)) {
-      return (firstRecord as any).data;
+    const latest = records[records.length - 1];
+    if (!latest) return [];
+
+    if (Array.isArray((latest as any).data)) {
+      return (latest as any).data;
     }
 
-    // Handle single record
-    return records as any[];
+    return [latest] as any[];
   }, [records]);
 
   return (
