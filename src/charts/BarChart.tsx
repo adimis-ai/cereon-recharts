@@ -514,18 +514,18 @@ export function BarChartCard({
   className,
   theme,
 }: ChartCardProps<BarChartCardSettings>) {
-  // Extract data from records — use latest record only
+  // Extract data from records
   const data = useMemo(() => {
     if (!records?.length) return [];
 
-    const latest = records[records.length - 1];
-    if (!latest) return [];
-
-    if (Array.isArray((latest as any).data)) {
-      return (latest as any).data;
+    // Handle different record formats
+    const firstRecord = records[0];
+    if (firstRecord && Array.isArray((firstRecord as any).data)) {
+      return (firstRecord as any).data;
     }
 
-    return [latest] as any[];
+    // Handle single record
+    return records as any[];
   }, [records]);
 
   return (
