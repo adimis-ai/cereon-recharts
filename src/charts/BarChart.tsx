@@ -102,7 +102,28 @@ export function BarChart({
     if (serialized !== _rawDataSerialized.current) {
       _rawDataSerialized.current = serialized;
       try {
-        const normalized = normalizeChartData(rawData);
+        let normalized = normalizeChartData(rawData);
+
+        // Backend may return simple arrays like [{name, value}, ...].
+        // Convert those to {index/name: <name>, value: <value>} shape
+        if (
+          Array.isArray(normalized) &&
+          normalized.length > 0 &&
+          typeof normalized[0] === "object" &&
+          "name" in normalized[0] &&
+          ("value" in normalized[0] || "downloads" in normalized[0])
+        ) {
+          normalized = normalized.map((r: any, i: number) => {
+            const out: any = { ...r };
+            // prefer explicit 'value' key, then 'downloads'
+            if (r.value !== undefined) out.value = r.value;
+            else if (r.downloads !== undefined) out.value = r.downloads;
+            // ensure there's an index/key for categorical axis
+            if (!("index" in out)) out.index = out.name ?? String(i);
+            return out;
+          });
+        }
+
         const coerced = coerceNumericStrings(normalized as any[]);
         setChartData(coerced as any[]);
       } catch (e) {
@@ -113,8 +134,28 @@ export function BarChart({
 
   // Generate series configuration if not provided
   const series = useMemo(() => {
+    // If user provided series, prefer them — but only if their dataKeys exist
+    // in the incoming data. If none of the provided series match the data,
+    // fall back to auto-generating series from numeric fields so charts
+    // still render for simple payload shapes (e.g. [{name, value}]).
     if (config.series?.length > 0) {
-      return config.series;
+      const provided = config.series;
+      try {
+        const hasMatch =
+          chartData && chartData.length
+            ? provided.some((s) =>
+                chartData.some((d: any) => typeof d?.[s.dataKey] === "number")
+              )
+            : false;
+        if (hasMatch) return provided;
+        // fallback to generation below
+        console.warn(
+          "BarChart: provided series dataKeys not found in data — auto-generating series instead",
+          provided.map((p) => p.dataKey)
+        );
+      } catch (e) {
+        // if anything goes wrong, continue to auto-generate
+      }
     }
 
     // Auto-generate series from data keys
@@ -175,9 +216,22 @@ export function BarChart({
     return getResponsiveMargin(containerWidth, config.margin);
   }, [width, config.margin]);
 
+  // Ensure there's room for category labels when layout is vertical
+  const marginForChart = useMemo(() => {
+    const m = { ...(margin || {}) } as Record<string, number>;
+    if (config.orientation === "horizontal") {
+      // reserve more left space for Y axis category labels (dates/names)
+      const left = typeof m.left === "number" ? m.left : 0;
+      if (left < 80) m.left = 80;
+    }
+    return m;
+  }, [margin, config.orientation]);
+
   // Determine layout based on orientation
-  const layout =
-    config.orientation === "horizontal" ? "verseReversed" : undefined;
+  // Recharts `layout` accepts 'horizontal' or 'vertical'.
+  // For a horizontal-oriented bar chart (bars run left-to-right),
+  // Recharts expects `layout="vertical"` (x axis = number, y axis = category).
+  const layout = config.orientation === "horizontal" ? "vertical" : undefined;
 
   if (loading) {
     return (
@@ -245,7 +299,7 @@ export function BarChart({
         <RechartsBarChart
           data={chartData}
           layout={layout as any}
-          margin={margin}
+          margin={marginForChart}
           barSize={config.barSize}
           maxBarSize={config.maxBarSize}
           barGap={config.barGap}
@@ -285,9 +339,13 @@ export function BarChart({
               type={config.orientation === "horizontal" ? "number" : "category"}
               dataKey={(() => {
                 if (config.orientation === "horizontal") return undefined;
-                const candidate =
-                  config.xAxis?.label?.value ||
-                  Object.keys(chartData[0] || {})[0];
+                // prefer explicit xAxis label, then 'index', then first key
+                const explicit = config.xAxis?.label?.value;
+                if (explicit && chartData.some((d: any) => d && d[explicit] !== undefined))
+                  return explicit;
+                if (chartData.length && chartData[0] && chartData[0].date !== undefined)
+                  return "date";
+                const candidate = Object.keys(chartData[0] || {})[0];
                 const missingCount = chartData.filter((d: any) => {
                   if (!candidate || typeof candidate !== "string") return true;
                   return d && typeof d[candidate] === "undefined";
@@ -321,10 +379,19 @@ export function BarChart({
             <YAxis
               type={config.orientation === "horizontal" ? "category" : "number"}
               dataKey={
-                config.orientation === "horizontal"
-                  ? config.yAxis?.label?.value ||
-                    Object.keys(chartData[0] || {})[0]
-                  : undefined
+                (() => {
+                  if (config.orientation !== "horizontal") return undefined;
+                  const candidate =
+                    config.yAxis?.label?.value ||
+                    config.xAxis?.label?.value ||
+                    Object.keys(chartData[0] || {})[0];
+                  const missingCount = chartData.filter((d: any) => {
+                    if (!candidate || typeof candidate !== "string") return true;
+                    return d && typeof d[candidate] === "undefined";
+                  }).length;
+                  if (missingCount > chartData.length / 2) return "index";
+                  return candidate;
+                })()
               }
               axisLine={config.yAxis?.line?.enabled !== false}
               tickLine={config.yAxis?.tick !== undefined}
